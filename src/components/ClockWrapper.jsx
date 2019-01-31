@@ -4,14 +4,14 @@ import Radium from 'radium'
 
 import Clock from './Clock'
 
-const MERIDIEM_SELECT_SIZE = 38;
+const MERIDIEM_SELECT_SIZE = 38
 
 export class ClockWrapper extends React.Component {
-	componentDidMount(){
+	componentDidMount() {
 		// force passing clockWrapperEl to child
 		this.forceUpdate()
 	}
-	render(){
+	render() {
 		const props = this.props
 		const config = props.config
 
@@ -19,11 +19,11 @@ export class ClockWrapper extends React.Component {
 			clockWrapper: {
 				textAlign: 'center',
 				padding: '18px 0 14px',
-				background: config.CLOCK_WRAPPER_BACKGROUND,
+				background: config.CLOCK_WRAPPER_BACKGROUND
 			},
 			meridiemWrapper: {
 				textAlign: 'left',
-				padding: '0 30px',
+				padding: '0px 10px',
 				marginTop: '-16px',
 				position: 'relative',
 				zIndex: 10
@@ -35,17 +35,17 @@ export class ClockWrapper extends React.Component {
 				display: 'inline-block',
 				padding: 0,
 				cursor: 'pointer',
-				borderRadius: '99px',
+				borderRadius: '4px',
+				border: '1px solid #E8ECEF',
 				width: MERIDIEM_SELECT_SIZE,
 				height: MERIDIEM_SELECT_SIZE,
-
 				textAlign: 'center',
 				lineHeight: MERIDIEM_SELECT_SIZE + 'px',
 				transition: '0.15s ease-out',
-				fontFamily: config.FONT_FAMILY,
+				fontFamily: config.FONT_FAMILY
 			},
 			meridiemRight: {
-				float: 'right',
+				float: 'right'
 			},
 			meridiemSelected: {
 				background: config.CLOCK_WRAPPER_MERIDIEM_BACKGROUND_COLOR_SELECTED,
@@ -54,13 +54,16 @@ export class ClockWrapper extends React.Component {
 		}
 
 		return (
-			<div style={styles.clockWrapper} className="react-timekeeper__clock-wrapper" ref={el => this.clockWrapperEl = el}>
+			<div
+				style={styles.clockWrapper}
+				className="react-timekeeper__clock-wrapper"
+				ref={el => (this.clockWrapperEl = el)}
+			>
 				<Clock
 					config={props.config}
 					hour={props.hour}
 					minute={props.minute}
 					unit={props.unit}
-
 					changeHour={props.changeHour}
 					changeMinute={props.changeMinute}
 					clockWrapperEl={this.clockWrapperEl}
@@ -70,12 +73,13 @@ export class ClockWrapper extends React.Component {
 					<button
 						type="button"
 						className="react-timekeeper-button-reset react-timekeeper__meridiem-toggle type_am "
-						style={[
-							styles.meridiem,
-							props.meridiem === 'am' && styles.meridiemSelected
-						]}
-						onClick={() => { props.changeMeridiem('am') }}
-					>AM</button>
+						style={[styles.meridiem, props.meridiem === 'am' && styles.meridiemSelected]}
+						onClick={() => {
+							props.changeMeridiem('am')
+						}}
+					>
+						AM
+					</button>
 					<button
 						type="button"
 						className="react-timekeeper-button-reset react-timekeeper__meridiem-toggle type_pm"
@@ -84,8 +88,12 @@ export class ClockWrapper extends React.Component {
 							styles.meridiemRight,
 							props.meridiem === 'pm' && styles.meridiemSelected
 						]}
-						onClick={() => { props.changeMeridiem('pm') }}
-					>PM</button>
+						onClick={() => {
+							props.changeMeridiem('pm')
+						}}
+					>
+						PM
+					</button>
 				</div>
 			</div>
 		)

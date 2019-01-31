@@ -8,10 +8,10 @@ import composeTime from '../helpers/compose-time'
 import ClockWrapper from './ClockWrapper'
 import Time from './Time'
 
-import * as defaultConfig from '../helpers/config';
+import * as defaultConfig from '../helpers/config'
 
 export class Timepicker extends React.Component {
-	constructor(props){
+	constructor(props) {
 		super(props)
 
 		this.state = {
@@ -23,12 +23,12 @@ export class Timepicker extends React.Component {
 		const config = Object.assign({}, defaultConfig, props.config)
 		this.config = config
 
-		this.changeHour =  this.handleTimeChange.bind(this, 'hour')
-		this.changeMinute =  this.handleTimeChange.bind(this, 'minute')
-		this.changeUnit =  this.changeUnit.bind(this)
+		this.changeHour = this.handleTimeChange.bind(this, 'hour')
+		this.changeMinute = this.handleTimeChange.bind(this, 'minute')
+		this.changeUnit = this.changeUnit.bind(this)
 		this.changeMeridiem = this.handleMeridiemChange.bind(this)
 
-		this.timeChangeHandler = null;
+		this.timeChangeHandler = null
 		if (typeof props.onChange === 'function') {
 			this.timeChangeHandler = debounce(() => {
 				this.props.onChange(this.getTime())
@@ -36,57 +36,63 @@ export class Timepicker extends React.Component {
 		}
 	}
 
-	componentWillReceiveProps(nextProps){
-		if (nextProps.time){
+	componentWillReceiveProps(nextProps) {
+		if (nextProps.time) {
 			this.setState(parseTime(nextProps.time))
 		}
 	}
 
-	getTime(){
-		const state = this.state;
-		return composeTime(state.hour, state.minute, state.meridiem);
+	getTime() {
+		const state = this.state
+		return composeTime(state.hour, state.minute, state.meridiem)
 	}
 
-	handleTimeChange(unit, val, canChangeUnit){
-		val = parseInt(val, 10);
-		if (isNaN(val)){
+	handleTimeChange(unit, val, canChangeUnit) {
+		val = parseInt(val, 10)
+		if (isNaN(val)) {
 			return
 		}
-		if (unit === 'hour' && val === 0){
+		if (unit === 'hour' && val === 0) {
 			val = 12
-		} else if (unit === 'minute' && val === 60){
+		} else if (unit === 'minute' && val === 60) {
 			val = 0
 		}
 
-		this.setState({
-			[unit]: val
-		}, this.timeChangeHandler) // update time on parent
+		this.setState(
+			{
+				[unit]: val
+			},
+			this.timeChangeHandler
+		) // update time on parent
 
 		const props = this.props
 
-		if (canChangeUnit && unit === 'hour' && props.switchToMinuteOnHourSelect){
+		if (canChangeUnit && unit === 'hour' && props.switchToMinuteOnHourSelect) {
 			this.changeUnit('minute')
-		} else if (canChangeUnit && unit === 'minute' && props.closeOnMinuteSelect){
+		} else if (canChangeUnit && unit === 'minute' && props.closeOnMinuteSelect) {
 			props.onDoneClick && props.onDoneClick()
 		}
 	}
-	handleMeridiemChange(val){
-		if (val !== this.state.meridiem){
-			this.setState({
-				meridiem: val
-			}, this.timeChangeHandler) // update on parent
+	handleMeridiemChange(val) {
+		if (val !== this.state.meridiem) {
+			this.setState(
+				{
+					meridiem: val
+				},
+				this.timeChangeHandler
+			) // update on parent
 		}
 	}
 
-	changeUnit(newUnit){
-		const currentUnit = this.state.unit;
-		if (currentUnit === newUnit){
-			return;
+	changeUnit(newUnit) {
+		const currentUnit = this.state.unit
+		if (currentUnit === newUnit) {
+			return
 		}
 		this.setState({ unit: newUnit })
 	}
 
-	render(){
+	render() {
 		const config = this.config
 		const styles = {
 			timePicker: {
@@ -95,10 +101,10 @@ export class Timepicker extends React.Component {
 				borderRadius: '3px',
 				display: 'inline-block',
 				// boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-				boxShadow: '0 3px 6px rgba(0,0,0,0.13), 0 3px 6px rgba(0,0,0,0.19)', 	// bigger
-				width: '260px',
+				boxShadow: '0 3px 6px rgba(0,0,0,0.13), 0 3px 6px rgba(0,0,0,0.19)', // bigger
+				width: '281px',
 				position: 'relative',
-				userSelect: 'none',
+				userSelect: 'none'
 			},
 			doneButton: {
 				display: 'block',
@@ -158,36 +164,37 @@ export class Timepicker extends React.Component {
 					hour={state.hour}
 					minute={state.minute}
 					meridiem={state.meridiem}
-
 					changeMeridiem={this.changeMeridiem}
 					changeHour={this.changeHour}
 					changeMinute={this.changeMinute}
 					changeUnit={this.changeUnit}
 				/>
-				
+
 				<ClockWrapper
 					config={this.config}
 					unit={state.unit}
 					hour={state.hour}
 					minute={state.minute}
 					meridiem={state.meridiem}
-
 					changeHour={this.changeHour}
 					changeMinute={this.changeMinute}
 					changeMeridiem={this.changeMeridiem}
 				/>
-				
-				{this.props.onDoneClick && <span style={styles.doneButton} onClick={this.props.onDoneClick}>Done</span> }
+
+				{this.props.onDoneClick && (
+					<span style={styles.doneButton} onClick={this.props.onDoneClick}>
+						Done
+					</span>
+				)}
 			</StyleRoot>
 		)
 	}
 }
 
-
 Timepicker.propTypes = {
 	time: PropTypes.string,
 	onChange: PropTypes.func,
-	
+
 	onDoneClick: PropTypes.func,
 	switchToMinuteOnHourSelect: PropTypes.bool,
 	closeOnMinuteSelect: PropTypes.bool,

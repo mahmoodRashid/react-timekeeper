@@ -1,11 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { spring, TransitionMotion } from 'react-motion';
+import { spring, TransitionMotion } from 'react-motion'
 import Radium from 'radium'
 
 import { calcOffset } from '../helpers/dom'
-import { CLOCK_DATA } from '../helpers/data';
-
+import { CLOCK_DATA } from '../helpers/data'
 
 // radius of clock, in px
 const CLOCK_RADIUS = 110
@@ -23,30 +22,29 @@ const NUMBER_SIZE = 34
 
 // positioning of numbers within circle
 const NUMBER_INNER_POSITION = 22
-function animationPosition(unit){
-	return unit === 'hour' ? NUMBER_INNER_POSITION - 30 : NUMBER_INNER_POSITION + 26;
+function animationPosition(unit) {
+	return unit === 'hour' ? NUMBER_INNER_POSITION - 30 : NUMBER_INNER_POSITION + 26
 }
 
 const { cos, sin, atan2 } = Math
 const pi = Math.PI
 
-function rad(deg){
+function rad(deg) {
 	return deg / (180 / pi)
 }
-function deg(rad){
+function deg(rad) {
 	return rad * (180 / pi)
 }
 
-
 export class Clock extends React.Component {
-	constructor(props){
+	constructor(props) {
 		super(props)
 		this.mousedown = this.mousedown.bind(this)
 		this.touchstart = this.touchstart.bind(this)
 	}
-	render(){
-		const props = this.props;
-		const config = props.config;
+	render() {
+		const props = this.props
+		const config = props.config
 		const styles = {
 			clock: {
 				display: 'inline-block',
@@ -56,6 +54,7 @@ export class Clock extends React.Component {
 				height: `${CLOCK_SIZE}px`,
 				position: 'relative',
 				cursor: 'pointer',
+				boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.05)'
 			},
 			numberPositioning: {
 				display: 'inline-block',
@@ -68,30 +67,30 @@ export class Clock extends React.Component {
 				height: NUMBER_SIZE,
 				textAlign: 'center',
 				lineHeight: NUMBER_SIZE + 'px',
-				zIndex: 5,
+				zIndex: 5
 			},
 			clockHand: {
 				position: 'relative'
 			}
 		}
 
-		function renderNumbersAndClockhand(){
+		function renderNumbersAndClockhand() {
 			const unit = props.unit
-			const animationItems = [unit === 'hour' ? 'hour' : 'minute'];
+			const animationItems = [unit === 'hour' ? 'hour' : 'minute']
 
 			const animationOptions = {
-				willEnter(transition){
+				willEnter(transition) {
 					return {
 						opacity: 0,
 						handOpacity: 0,
-						translate: animationPosition(transition.data),
+						translate: animationPosition(transition.data)
 					}
 				},
-				willLeave(transition){
+				willLeave(transition) {
 					return {
 						opacity: spring(0),
 						handOpacity: spring(0),
-						translate: spring( animationPosition(transition.data) ),
+						translate: spring(animationPosition(transition.data))
 					}
 				},
 				styles: animationItems.map(unit => {
@@ -99,8 +98,8 @@ export class Clock extends React.Component {
 						key: unit,
 						style: {
 							opacity: spring(1),
-							handOpacity: spring(1, {stiffness: 120, damping: 40}),
-							translate: spring(NUMBER_INNER_POSITION),
+							handOpacity: spring(1, { stiffness: 120, damping: 40 }),
+							translate: spring(NUMBER_INNER_POSITION)
 						},
 						data: unit
 					}
@@ -109,66 +108,127 @@ export class Clock extends React.Component {
 
 			const handRotation = props[unit] * (360 / CLOCK_DATA[unit].increments)
 
-			return <TransitionMotion {...animationOptions}>
-				{interpolatedStyles =>
-					<div className="react-timekeeper__clock-animations-wrapper">
-						{interpolatedStyles.map(anim => {
-							const data = CLOCK_DATA[anim.data]
+			return (
+				<TransitionMotion {...animationOptions}>
+					{interpolatedStyles => (
+						<div className="react-timekeeper__clock-animations-wrapper">
+							{interpolatedStyles.map(anim => {
+								const data = CLOCK_DATA[anim.data]
 
-							let showIntermediateValueDisplay;
-							if (anim.data === 'minute' && props.minute%5){
-								showIntermediateValueDisplay = <circle cx={CLOCK_RADIUS} cy={NUMBER_INNER_POSITION} r={4}
-									fill={config.CLOCK_HAND_INTERMEDIATE_CIRCLE_BACKGROUND}
-								/>
-							}
-							
-							return <div style={{position: 'absolute'}} key={anim.data} ref={el => this.clock = el} className="react-timekeeper__clock-animations">
-								{data.numbers.map((numberString, i) => {
-									const num = i + 1;
-									return (
-										<span
-											key={numberString}
-											style={{
-												...styles.numberPositioning,
-												opacity: anim.style.opacity,
-												left: sin( rad(num * -NUMBER_INCREMENTS_VALUE - 180) ) * (CLOCK_RADIUS - anim.style.translate) + CLOCK_RADIUS - NUMBER_SIZE / 2,
-												top: cos( rad(num * -NUMBER_INCREMENTS_VALUE - 180) ) * (CLOCK_RADIUS - anim.style.translate) + CLOCK_RADIUS - NUMBER_SIZE / 2,
-											}}
-										>
-											{numberString}
-										</span>
+								let showIntermediateValueDisplay
+								if (anim.data === 'minute' && props.minute % 5) {
+									showIntermediateValueDisplay = (
+										<circle
+											cx={CLOCK_RADIUS}
+											cy={NUMBER_INNER_POSITION}
+											r={4}
+											fill={config.CLOCK_HAND_INTERMEDIATE_CIRCLE_BACKGROUND}
+										/>
 									)
-								})}
+								}
 
-								{/* place svg over and set z-index on numbers to prevent highlighting numbers on drag */}
-								<svg width={CLOCK_SIZE} height={CLOCK_SIZE} viewBox={`0 0 ${CLOCK_SIZE} ${CLOCK_SIZE}`} xmlns="http://www.w3.org/2000/svg"
-									style={{
-										...styles.clockHand,
-										opacity: anim.style.handOpacity,
-									}}
-									className="react-timekeeper__clock-svgs"
-								>
-									<g transform={`rotate(${handRotation} ${CLOCK_RADIUS} ${CLOCK_RADIUS})`}>
-										<line x1={CLOCK_RADIUS} y1={CLOCK_RADIUS} x2={CLOCK_RADIUS} y2={CLOCK_RADIUS - CLOCK_HAND_LENGTH}
-											strokeWidth="1"
-											stroke={config.CLOCK_HAND_ARM}
-										/>
-										<circle cx={CLOCK_RADIUS} cy={CLOCK_RADIUS} r={1.5}
-											fill={config.CLOCK_HAND_ARM}
-										/>
-										<circle cx={CLOCK_RADIUS} cy={NUMBER_INNER_POSITION} r={NUMBER_SIZE / 2}
-											fill={config.CLOCK_HAND_CIRCLE_BACKGROUND}
-										/>
-										{showIntermediateValueDisplay}
-									</g>
-								</svg>
-							</div>
-						})}
-					</div>
-				}
-			</TransitionMotion>
+								return (
+									<div
+										style={{ position: 'absolute' }}
+										key={anim.data}
+										ref={el => (this.clock = el)}
+										className="react-timekeeper__clock-animations"
+									>
+										{data.numbers.map((numberString, i) => {
+											const num = i + 1
+											return (
+												<span
+													key={numberString}
+													style={{
+														...styles.numberPositioning,
+														opacity: anim.style.opacity,
+														left:
+															sin(rad(num * -NUMBER_INCREMENTS_VALUE - 180)) *
+																(CLOCK_RADIUS - anim.style.translate) +
+															CLOCK_RADIUS -
+															NUMBER_SIZE / 2,
+														top:
+															cos(rad(num * -NUMBER_INCREMENTS_VALUE - 180)) *
+																(CLOCK_RADIUS - anim.style.translate) +
+															CLOCK_RADIUS -
+															NUMBER_SIZE / 2
+													}}
+												>
+													{numberString}
+												</span>
+											)
+										})}
+
+										{/* place svg over and set z-index on numbers to prevent highlighting numbers on drag */}
+										<svg
+											width={CLOCK_SIZE}
+											height={CLOCK_SIZE}
+											viewBox={`0 0 ${CLOCK_SIZE} ${CLOCK_SIZE}`}
+											xmlns="http://www.w3.org/2000/svg"
+											style={{
+												...styles.clockHand,
+												opacity: anim.style.handOpacity
+											}}
+											className="react-timekeeper__clock-svgs"
+										>
+											{/* //TODO need to change it to dynamic */}
+											{config.CLOCK_LINES ? (
+												<g
+													transform={`rotate(${handRotation} ${CLOCK_RADIUS} ${CLOCK_RADIUS})`}
+												>
+													<line
+														x1={CLOCK_RADIUS}
+														y1={CLOCK_RADIUS}
+														x2={CLOCK_RADIUS}
+														y2={40}
+														strokeWidth="1"
+														stroke={'#f8f8f8'}
+													/>
+													<line
+														x1={110}
+														y1={50}
+														x2={110}
+														y2={40}
+														strokeWidth="1"
+														stroke={'#83c921'}
+													/>
+												</g>
+											) : (
+												<g
+													transform={`rotate(${handRotation} ${CLOCK_RADIUS} ${CLOCK_RADIUS})`}
+												>
+													<line
+														x1={CLOCK_RADIUS}
+														y1={CLOCK_RADIUS}
+														x2={CLOCK_RADIUS}
+														y2={CLOCK_RADIUS - CLOCK_HAND_LENGTH}
+														strokeWidth="1"
+														stroke={config.CLOCK_HAND_ARM}
+													/>
+													<circle
+														cx={CLOCK_RADIUS}
+														cy={CLOCK_RADIUS}
+														r={1.5}
+														fill={config.CLOCK_HAND_ARM}
+													/>
+													<circle
+														cx={CLOCK_RADIUS}
+														cy={NUMBER_INNER_POSITION}
+														r={NUMBER_SIZE / 2}
+														fill={config.CLOCK_HAND_CIRCLE_BACKGROUND}
+													/>
+													{showIntermediateValueDisplay}
+												</g>
+											)}
+										</svg>
+									</div>
+								)
+							})}
+						</div>
+					)}
+				</TransitionMotion>
+			)
 		}
-
 
 		return (
 			<div
@@ -177,32 +237,32 @@ export class Clock extends React.Component {
 				onTouchStart={this.touchstart}
 				className="react-timekeeper__clock"
 			>
-				{ renderNumbersAndClockhand.call(this) }
+				{renderNumbersAndClockhand.call(this)}
 			</div>
 		)
 	}
-	
-	handlePoint(clientX, clientY, canChangeUnit){
+
+	handlePoint(clientX, clientY, canChangeUnit) {
 		const x = clientX - CLOCK_RADIUS
 		const y = -clientY + CLOCK_RADIUS
 
 		const a = atan2(y, x)
 		let d = 90 - deg(a)
-		if ( d < 0 ){
+		if (d < 0) {
 			d = 360 + d
 		}
 
 		const unit = this.props.unit
-		const selected = Math.round( d / 360 * CLOCK_DATA[unit].increments )
+		const selected = Math.round((d / 360) * CLOCK_DATA[unit].increments)
 
-		if (unit === 'hour'){
+		if (unit === 'hour') {
 			this.props.changeHour(selected, canChangeUnit)
-		} else if (unit === 'minute'){
+		} else if (unit === 'minute') {
 			this.props.changeMinute(selected, canChangeUnit)
 		}
 	}
 
-	mousedown(){
+	mousedown() {
 		this.mousedragHandler = this.mousedrag.bind(this)
 		this.stopDragHandler = this.stopDragHandler.bind(this)
 
@@ -211,14 +271,14 @@ export class Clock extends React.Component {
 		document.addEventListener('mouseup', this.stopDragHandler, false)
 		this.props.clockWrapperEl.addEventListener('mouseleave', this.stopDragHandler, false)
 	}
-	mousedrag(e){
+	mousedrag(e) {
 		const { offsetX, offsetY } = calcOffset(this.clock, e.clientX, e.clientY)
 		this.handlePoint(offsetX, offsetY)
 
 		e.preventDefault()
 		return false
 	}
-	touchstart(){
+	touchstart() {
 		// bind handlers
 		this.touchdragHandler = this.touchdrag.bind(this)
 		this.stopDragHandler = this.stopDragHandler.bind(this)
@@ -229,51 +289,49 @@ export class Clock extends React.Component {
 		document.addEventListener('touchend', this.stopDragHandler, false)
 		document.addEventListener('touchcancel', this.stopDragHandler, false)
 	}
-	touchdrag(e){
-		const touch = e.targetTouches[0];
+	touchdrag(e) {
+		const touch = e.targetTouches[0]
 		const { offsetX, offsetY } = calcOffset(this.clock, touch.clientX, touch.clientY)
 		this.handlePoint(offsetX, offsetY)
 
 		e.preventDefault()
 		return false
 	}
-	stopDragHandler(e = {}){
+	stopDragHandler(e = {}) {
 		document.removeEventListener('mousemove', this.mousedragHandler, false)
 		document.removeEventListener('mouseup', this.stopDragHandler, false)
 		this.props.clockWrapperEl.removeEventListener('mouseleave', this.stopDragHandler, false)
 
-		document.removeEventListener('touchmove', this.touchdragHandler, false);
+		document.removeEventListener('touchmove', this.touchdragHandler, false)
 		document.addEventListener('touchend', this.stopDragHandler, false)
 		document.addEventListener('touchcancel', this.stopDragHandler, false)
 		window.blockMenuHeaderScroll = false
 
-		const evType = e.type;
-		if (evType === 'mouseup'){
+		const evType = e.type
+		if (evType === 'mouseup') {
 			const { offsetX, offsetY } = calcOffset(this.clock, e.clientX, e.clientY)
 			this.handlePoint(offsetX, offsetY, true)
-		} else if (evType === 'touchcancel' || evType === 'touchend'){
-			const touch = e.targetTouches[0];
-			if (touch){
+		} else if (evType === 'touchcancel' || evType === 'touchend') {
+			const touch = e.targetTouches[0]
+			if (touch) {
 				const { offsetX, offsetY } = calcOffset(this.clock, touch.clientX, touch.clientY)
 				this.handlePoint(offsetX, offsetY, true)
 			}
 		}
 	}
 
-	componentWillUnmount(){
+	componentWillUnmount() {
 		// clear any event listeners
 		this.stopDragHandler()
 	}
 }
-
-
 
 Clock.propTypes = {
 	config: PropTypes.object.isRequired,
 	hour: PropTypes.number.isRequired,
 	minute: PropTypes.number.isRequired,
 	unit: PropTypes.string.isRequired,
-	
+
 	changeHour: PropTypes.func.isRequired,
 	changeMinute: PropTypes.func.isRequired,
 	clockWrapperEl: PropTypes.object
